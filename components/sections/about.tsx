@@ -80,7 +80,7 @@ export default function About() {
           >
             <div className="relative aspect-[1.5/1] overflow-hidden rounded-sm bg-gray-100">
               <Image
-                src="/images/profile/irfan.jpg"
+                src="/images/profile/irfan.png"
                 alt="Portrait of Irfan Ansari"
                 fill
                 sizes="(max-width: 1024px) 100vw, 40vw"
