@@ -11,9 +11,9 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-screen bg-[#f7f8fa]">
-      <div className="hidden lg:block">
-        <AdminSidebar />
-      </div>
+      <div className="shrink-0">
+  <AdminSidebar />
+</div>
 
       <div className="flex min-w-0 flex-1 flex-col">
         <AdminHeader email={admin.email} />
