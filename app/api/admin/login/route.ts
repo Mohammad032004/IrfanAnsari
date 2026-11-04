@@ -1,5 +1,5 @@
+
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import { z } from "zod";
 
 import { createAdminSession } from "@/lib/admin-auth";
@@ -11,7 +11,10 @@ const loginSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Read request body
     const body = await request.json();
+
+    // Validate input
     const result = loginSchema.safeParse(body);
 
     if (!result.success) {
@@ -23,24 +26,30 @@ export async function POST(request: NextRequest) {
 
     const { email, password } = result.data;
 
+    // Read credentials from environment variables
     const adminEmail = process.env.ADMIN_EMAIL;
-    const passwordHash = process.env.ADMIN_PASSWORD_HASH;
+    const adminPassword = process.env.ADMIN_PASSWORD;
 
-    if (!adminEmail || !passwordHash) {
+    // Check environment configuration
+    if (!adminEmail || !adminPassword) {
+      console.error("Admin credentials are not configured.");
+
       return NextResponse.json(
         { message: "Admin authentication is not configured." },
         { status: 500 }
       );
     }
 
+    // Verify email
     const emailMatches =
-      email.trim().toLowerCase() === adminEmail.trim().toLowerCase();
+      email.trim().toLowerCase() ===
+      adminEmail.trim().toLowerCase();
 
-    const passwordMatches = await bcrypt.compare(
-      password,
-      passwordHash
-    );
+    // Verify password (local development only)
+    const passwordMatches =
+      password === adminPassword;
 
+    // Reject invalid credentials
     if (!emailMatches || !passwordMatches) {
       return NextResponse.json(
         { message: "Incorrect email or password." },
@@ -48,17 +57,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Create authenticated admin session
     await createAdminSession(adminEmail);
 
-    return NextResponse.json({
-      success: true,
-      redirectTo: "/admin/dashboard",
-    });
+    // Successful login
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Login successful.",
+        redirectTo: "/admin/dashboard",
+      },
+      { status: 200 }
+    );
+
   } catch (error) {
     console.error("Admin login error:", error);
 
     return NextResponse.json(
-      { message: "Unable to sign in. Please try again." },
+      { message: "Something went wrong. Please try again." },
       { status: 500 }
     );
   }
